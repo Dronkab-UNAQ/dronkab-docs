@@ -1,0 +1,16 @@
+# Compilación de MkDocs
+/site/
+/.cache/
+
+# Entornos virtuales y dependencias de Python
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Configuración local de editores y SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
