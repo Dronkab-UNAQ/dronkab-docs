@@ -1,8 +1,24 @@
-# Memoria Técnica y Documentación Viva
+# Portal Técnico Dronkab
 
-Bienvenido al portal oficial de documentación y transferencia de conocimiento de **Dronkab**.
+Bienvenido al repositorio central de documentación, estandarización y memoria técnica de Dronkab.
 
-Este espacio está diseñado bajo el paradigma *Docs-as-Code*: el conocimiento se documenta con la misma disciplina, versionado y control de calidad con el que desarrollamos software y hardware.
+!!! info "Estado de la infraestructura"
+    Este sitio web se compila automáticamente mediante integración continua (CI/CD) utilizando Markdown como estándar técnico.
+
+## Verificación de renderizado de diagramas
+
+```mermaid
+graph TD
+    A[Adquisición: LiDAR / Cámaras] --> B[Procesamiento: ROS 2 / Docker]
+    B --> C[Control y Navegación: PX4]
+    C --> D[Actuación y Telemetría]
+```
+
+## Verificación de fórmulas matemáticas
+
+$$
+f(x) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{1}{2}\left(\frac{x-\mu}{\sigma}\right)^2}
+$$
 
 ## Ejes de desarrollo inmediato
 
