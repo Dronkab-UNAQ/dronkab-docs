@@ -1,0 +1,61 @@
+site_name: Dronkab Docs
+site_description: Base de conocimiento técnico y documentación viva de Dronkab.
+site_author: Equipo Dronkab
+site_url: https://Dronkab-UNAQ.github.io/dronkab-docs/ # Ajusta según la organización exacta
+
+theme:
+  name: material
+  language: es
+  palette:
+    # Esquema claro (modo día)
+    - scheme: default
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Cambiar a modo oscuro
+    # Esquema oscuro (modo noche)
+    - scheme: slate
+      primary: teal
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Cambiar a modo claro
+  features:
+    - navigation.tabs          # Pestañas superiores por categoría
+    - navigation.sections      # Secciones colapsables en barra lateral
+    - navigation.top           # Botón para volver arriba
+    - search.suggest           # Sugerencias dinámicas en el buscador
+    - search.highlight         # Resaltado de términos de búsqueda
+    - content.code.copy        # Botón para copiar código al portapapeles
+
+markdown_extensions:
+  # Cajas de advertencia y notas (Callouts / Admonitions)
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  
+  # Resaltado de sintaxis en bloques de código
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+
+  # Formulación matemática (LaTeX / MathJax / KaTeX)
+  - pymdownx.arithmatex:
+      generic: true
+
+  # Tablas y formato semántico
+  - tables
+  - attr_list
+  - md_in_html
+
+# Navegación estructural base
+nav:
+  - Inicio: index.md
