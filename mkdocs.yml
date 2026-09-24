@@ -1,7 +1,7 @@
 site_name: Dronkab Docs
 site_description: Base de conocimiento técnico y documentación viva de Dronkab.
 site_author: Equipo Dronkab
-site_url: https://Dronkab-UNAQ.github.io/dronkab-docs/ # Ajusta según la organización exacta
+site_url: https://dronkab-unaq.github.io/dronkab-docs/ # Ajusta según la organización exacta
 
 theme:
   name: material
