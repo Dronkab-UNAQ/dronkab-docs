@@ -147,3 +147,45 @@ docker compose exec drone xrce
 docker compose exec drone bash
 cd /ros_ws
 cb
+```
+
+### Comandos y alias integrados en el contenedor
+
+| Comando | Acción técnica |
+| :--- | :--- |
+| `cb` | Compila el espacio de trabajo con enlaces simbólicos (`colcon build --symlink-install`)[cite: 2]. |
+| `cbs <paquete>` | Compila únicamente el paquete de ROS 2 seleccionado[cite: 2]. |
+| `cs` | Carga las variables de entorno del espacio de trabajo (`source install/setup.bash`)[cite: 2]. |
+| `xrce` | Inicia el agente de Micro XRCE-DDS por protocolo UDP en el puerto 8888[cite: 2]. |
+| `px4_gz` | Compila (si es necesario) y ejecuta PX4 conectado a Gazebo con el modelo base x500[cite: 2]. |
+| `px4-sim <target>` | Compila y lanza la simulación con modelos específicos (por ejemplo: `px4-sim gz_x500_depth`)[cite: 2]. |
+| `px4-checkout <tag>` | Cambia la rama o etiqueta de PX4, actualiza submódulos y limpia la configuración previa de compilación[cite: 2]. |
+| `px4-sync-assets` | Genera enlaces simbólicos de los modelos de `Dronkab-gz-models` dentro del simulador sin reconstruir la imagen[cite: 2]. |
+
+---
+
+## 5. Aceleración gráfica por hardware con NVIDIA (opcional)
+
+Por defecto, la simulación opera mediante renderizado por software en el procesador[cite: 2]. Para delegar la carga gráfica a una tarjeta NVIDIA dedicada, instala el paquete de herramientas en el sistema anfitrión[cite: 2]:
+
+```bash
+curl -fsSL [https://nvidia.github.io/libnvidia-container/gpgkey](https://nvidia.github.io/libnvidia-container/gpgkey) | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
+curl -s -L [https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list](https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list) | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
+
+sudo apt update
+sudo apt install -y nvidia-container-toolkit
+sudo nvidia-ctk runtime configure --runtime=docker
+sudo systemctl restart docker
+```
+
+Al reiniciar el servicio, `docker-compose.yml` reservará automáticamente los recursos de la tarjeta gráfica al ejecutar `docker compose up -d`[cite: 2].
+
+---
+
+## 6. Proyección del ecosistema hacia el futuro
+
+La infraestructura de contenedores de Dronkab continuará creciendo de manera modular:
+
+1. **`Docker-Rasp5`:** Entorno para arquitectura ARM64 enfocado en adquisición directa de hardware (LiDAR por UART, cámaras por interfaz CSI) y enlace con el autopiloto en vuelo real.
+2. **Contenedores de visión e inferencia:** Entornos específicos para aceleración de redes neuronales y visión artificial, manteniendo desacopladas las librerías pesadas de procesamiento visual del contenedor de control básico.
+3. **Contenedor documental (`dronkab-docs`):** Imagen ligera con MkDocs para compilar y validar la documentación sin requerir instalaciones de Python en los equipos de los integrantes.
