@@ -28,6 +28,7 @@ graph TD
     WS -.->|Bind mount| SimContainer
     GZ_MOD -.->|Bind mount| SimContainer
     SimContainer -->|Validación algorítmica previa| CompanionContainer
+```
 
 1. Arquitectura del espacio de trabajo en el sistema anfitriónPara que las compilaciones y el código sobrevivan a la recreación de contenedores, todo el trabajo vive en una carpeta central en el sistema de archivos de tu computadora y se enlaza al contenedor mediante montajes directos (bind mounts):   Plaintext~/drone_dev/
 ├── Docker_dev_DK/          # Archivos de configuración del contenedor (Dockerfile, compose)
