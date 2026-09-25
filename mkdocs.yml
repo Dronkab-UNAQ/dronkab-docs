@@ -67,8 +67,11 @@ nav:
   
   - Onboarding:
       - Bienvenido al equipo: onboarding/primeros_pasos.md
-      - Entorno Docker: onboarding/entorno_docker.md
-      - Flujo Git y Contribución: onboarding/flujo_git.md
+      - Flujo Git y contribución: onboarding/flujo_git.md
+      - Ecosistema Docker:
+          - Visión general y arquitectura: onboarding/docker/entorno_docker.md
+          - Entorno de desarrollo (PC): onboarding/docker/entorno_docker_dev.md
+          - Entorno embebido (dron): onboarding/docker/entorno_docker_dron.md
 
   - Hardware:
       - Ejemplo de documentación: hardware/ejemplo_documento.md
