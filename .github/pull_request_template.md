@@ -1,11 +1,11 @@
-### 1. Resumen de la Integración
+### 1. Resumen de tu integración
 <!-- Explica de forma concisa qué documentación, guías o sistemas se están incorporando o actualizando en este Pull Request hacia 'main'. -->
 - **Módulos afectados:** 
 - **Objetivo del cambio:** 
 
 ---
 
-### 2. Tipo de Contribución
+### 2. Tipo de contribución
 Marca con una `x` las opciones aplicables:
 - [ ] `docs`: Adición o actualización de documentación técnica en Markdown.
 - [ ] `feat`: Configuración de nuevas herramientas, extensiones de MkDocs o scripts.
@@ -14,7 +14,7 @@ Marca con una `x` las opciones aplicables:
 
 ---
 
-### 3. Lista de Verificación del Autor (Checklist Pre-Merge)
+### 3. Lista de verificación del autor (checklist Pre-Merge)
 Asegúrate de marcar todas las casillas antes de solicitar la revisión:
 - [ ] **Origen y destino correctos:** Este PR proviene de `develop` (o rama de trabajo autorizada) hacia `main`.
 - [ ] **Compilación local sin advertencias:** Ejecuté `mkdocs serve` y verifiqué que no hay errores de sintaxis en la consola.
@@ -25,5 +25,5 @@ Asegúrate de marcar todas las casillas antes de solicitar la revisión:
 
 ---
 
-### 4. Notas para el Revisor (*Peer Reviewer*)
+### 4. Notas para el revisor (*Peer Reviewer*)
 <!-- Señala puntos específicos donde requieras atención especial (ej. dudas teóricas, terminología, claridad de algún procedimiento). -->
