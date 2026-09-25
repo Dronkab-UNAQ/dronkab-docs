@@ -1,191 +1,85 @@
-# Ecosistema de contenedores Docker en Dronkab
+# Entorno de desarrollo y simulación (Docker_dev_DK)
 
-Para garantizar la reproducibilidad técnica en cualquier computadora y simplificar la transición del software hacia el hardware real, el equipo estandariza sus herramientas mediante contenedores Docker[cite: 1, 2]. 
+En robótica aérea autónoma, la estación de desarrollo personal cumple el rol de laboratorio virtual: permite diseñar la lógica de navegación, procesar flujos de percepción y validar misiones completas mediante simulación en lazo cerrado (*software-in-the-loop* o SITL) antes de interactuar con una aeronave física[cite: 2].
 
-En lugar de mantener un único entorno monolítico, Dronkab opera bajo una arquitectura modular donde cada contenedor atiende un propósito de ingeniería específico: desarrollo y simulación en computadoras personales (`Docker_dev_DK`)[cite: 2], ejecución en computadoras de vuelo a bordo (`Docker-Rasp5`), y futuros entornos dedicados de procesamiento de datos o pruebas en lazo cerrado (*software-in-the-loop*).
+El módulo `Docker_dev_DK` encapsula esta cadena de diseño en un entorno estandarizado sobre Ubuntu 24.04, mitigando discrepancias de compilación entre los integrantes del equipo y aislando dependencias complejas del sistema operativo anfitrión[cite: 1, 2].
 
 ```mermaid
 graph TD
-    subgraph Host["Sistema anfitrión (tu computadora)"]
-        WS["Espacio de trabajo local: ~/drone_dev/"]
-        DK_DEV["Repositorio: Docker_dev_DK"]
-        GZ_MOD["Modelos y mundos: Dronkab-gz-models"]
+    subgraph Estacion["Estación de trabajo (arquitectura x86_64)"]
+        WS["Espacio de trabajo local: ~/drone_dev/ros_ws"]
+        CC["Caché de compilación persistente: .ccache"]
+        Modelos["Activos y mundos 3D: Dronkab-gz-models"]
     end
 
-    subgraph SimContainer["Contenedor de desarrollo (Docker_dev_DK)"]
-        ROS["ROS 2 Jazzy"]
-        GZ["Gazebo Harmonic"]
+    subgraph Contenedor["Contenedor Docker_dev_DK"]
         PX4["PX4 Autopilot SITL"]
-        XRCE["Micro XRCE-DDS Agent"]
+        GZ["Gazebo Harmonic (física y sensores)"]
+        ROS["ROS 2 Jazzy Jalisco"]
+        DDS["Agente Micro XRCE-DDS"]
     end
 
-    subgraph CompanionContainer["Contenedor embebido (Docker-Rasp5)"]
-        ROS_PI["ROS 2 ligero"]
-        UART["Puertos seriales (LiDAR / Pixhawk)"]
-        PERCEP["Algoritmos de percepción activa"]
-    end
-
-    WS -.->|Bind mount| SimContainer
-    GZ_MOD -.->|Bind mount| SimContainer
-    SimContainer -->|Validación algorítmica previa| CompanionContainer
+    WS -.->|Montaje enlazado / bind mount| ROS
+    CC -.->|Persistencia de objetos compilados| PX4
+    Modelos -.->|Recursos visuales| GZ
+    PX4 <-->|Protocolo uORB / DDS| DDS
+    DDS <-->|Tópicos estándar| ROS
+    GZ <-->|Puente de simulación ros_gz_bridge| ROS
 ```
 
 ---
 
-## 1. Arquitectura del espacio de trabajo en el sistema anfitrión
+## 1. Pila tecnológica y justificación técnica
 
-Para que las compilaciones y el código sobrevivan a la recreación de contenedores, todo el trabajo vive en una carpeta central en el sistema de archivos de tu computadora y se enlaza al contenedor mediante montajes directos (*bind mounts*)[cite: 2]:
+La arquitectura de este entorno integra cuatro pilares del desarrollo moderno en robótica móvil[cite: 2]:
 
-```text
-~/drone_dev/
-├── Docker_dev_DK/          # Archivos de configuración del contenedor (Dockerfile, compose)
-├── PX4-Autopilot/          # Código fuente de PX4 (se clona automáticamente)
-├── ros_ws/                 # Espacio de trabajo de ROS 2 (paquetes y código propio)
-│   └── src/
-├── Dronkab-gz-models/       # Modelos 3D, mundos y sensores de Gazebo
-└── .ccache/                # Caché persistente para acelerar recompilaciones de C++
-```
-
-| Ruta en tu computadora | Punto de montaje interno | Propósito técnico |
-| :--- | :--- | :--- |
-| `~/drone_dev/PX4-Autopilot` | `/px4/PX4-Autopilot` | Código fuente de PX4 enlazado; permite cambiar de versión sin reconstruir la imagen[cite: 2]. |
-| `~/drone_dev/ros_ws` | `/ros_ws` | Directorio de trabajo para nodos y algoritmos[cite: 2]. |
-| `~/drone_dev/Dronkab-gz-models` | `/gz_assets` | Modelos de drones, arenas y texturas para simulación[cite: 2]. |
-| `~/drone_dev/.ccache` | `/home/DronKab/.ccache` | Caché de compilación compartida entre sesiones de trabajo[cite: 2]. |
+* **ROS 2 Jazzy Jalisco:** Distribución de soporte extendido utilizada como intermediario (*middleware*) para la suscripción y publicación de tópicos sensoriales, odometría, servicios y acciones de control[cite: 2].
+* **PX4 Autopilot (modo SITL):** Firmware de control de vuelo compilado de forma nativa para ejecutarse como un proceso en la computadora[cite: 2]. Emula la dinámica de vuelo, los lazos de control proporcional-integral-derivativo (PID) y el estimador de estado (EKF2) sin depender de hardware físico[cite: 2].
+* **Gazebo Harmonic:** Motor de simulación de física rígida, colisiones e iluminación, responsable de emular el comportamiento de actuadores y renderizar la información de sensores complejos (cámaras de visión espacial, mapas de profundidad y sensores de rango)[cite: 2].
+* **Micro XRCE-DDS:** Agente de comunicación ligero de alto rendimiento que conecta el bus de mensajería interna del piloto automático (uORB) con el grafo distribuido de ROS 2 a través de sockets de red UDP[cite: 2].
 
 ---
 
-## 2. Preparación inicial del sistema anfitrión (Ubuntu)
+## 2. Principios de arquitectura y persistencia
 
-Para instalar el motor oficial de Docker y configurar los permisos necesarios sin requerir privilegios de superusuario (`sudo`) en cada ejecución[cite: 2]:
+Para asegurar que el flujo de trabajo sea eficiente, flexible e higiénico, el diseño de este contenedor se rige por tres directrices[cite: 2]:
 
-### 2.1 Desinstalación de paquetes previos y configuración de repositorios
-```bash
-# Limpiar paquetes genéricos previos
-sudo apt remove -y docker docker-engine docker.io containerd runc
+### Desacoplamiento del código fuente (*bind mounts*)
+El contenedor no almacena código fuente dentro de su propia imagen[cite: 2]. Los directorios de trabajo —como los paquetes de ROS 2, los modelos tridimensionales y el código base del piloto automático— se montan en tiempo de ejecución desde el sistema anfitrión[cite: 2]. Esto garantiza que cualquier modificación persista en la máquina del desarrollador aunque el contenedor sea eliminado o reconstruido[cite: 2].
 
-# Instalar certificados y llaves oficiales
-sudo apt update
-sudo apt install -y ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL [https://download.docker.com/linux/ubuntu/gpg](https://download.docker.com/linux/ubuntu/gpg) | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+### Independencia de versiones de firmware
+El código de PX4 no se encuentra congelado de forma estática en la imagen base[cite: 2]. El entorno permite cambiar de versión, rama o etiqueta de compilación mediante variables de entorno y volúmenes dedicados, permitiendo probar versiones estables de competencia junto a versiones recientes compatibles con motores de simulación avanzados[cite: 2].
 
-# Agregar el repositorio estable de Docker
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] [https://download.docker.com/linux/ubuntu](https://download.docker.com/linux/ubuntu) $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-```
-
-### 2.2 Instalación del motor y adición al grupo de usuarios
-```bash
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-# Asignar usuario al grupo docker
-sudo usermod -aG docker $USER
-newgrp docker
-```
+### Aceleración gráfica y redirección de interfaz
+Para visualizar la simulación física e inspeccionar nubes de puntos o mapas de ocupación mediante RViz2, el contenedor redirige la salida del servidor gráfico hacia el monitor anfitrión a través de sockets X11 o Wayland[cite: 1, 2]. Asimismo, está preparado para integrar aceleración de renderizado por hardware cuando la máquina anfitriona cuenta con procesadores gráficos dedicados[cite: 2].
 
 ---
 
-## 3. Puesta en marcha de `Docker_dev_DK`
+## 3. Dinámica del flujo de trabajo
 
-!!! note "Acceso a repositorios internos"
-    `Docker_dev_DK` y `Dronkab-gz-models` son repositorios de desarrollo alojados dentro de la organización de GitHub del equipo. Requieren permisos de colaborador activo para su clonación.
+El ciclo habitual de desarrollo con este entorno sigue un proceso secuencial de validación progresiva[cite: 2]:
 
-### 3.1 Creación de carpetas y descarga de repositorios
-Prepara la estructura de carpetas en tu terminal local[cite: 2]:
-
-```bash
-mkdir -p ~/drone_dev/ros_ws/src
-mkdir -p ~/drone_dev/PX4-Autopilot
-mkdir -p ~/drone_dev/.ccache
-cd ~/drone_dev
-
-# Clonar los repositorios de trabajo
-git clone [https://github.com/Dronkab/Docker_dev_DK.git](https://github.com/Dronkab/Docker_dev_DK.git)
-git clone [https://github.com/Dronkab/Dronkab-gz-models.git](https://github.com/Dronkab/Dronkab-gz-models.git)
-```
-
-### 3.2 Selección de versión de PX4 mediante variables de entorno
-La versión de PX4 se gestiona de forma desacoplada sin modificar el archivo de construcción[cite: 2]:
-
-```bash
-cd ~/drone_dev/Docker_dev_DK
-cp .env.example .env
-```
-
-Edita `.env` para fijar la versión según los requerimientos de la prueba[cite: 2]:
-* **`v1.14.3`:** Versión estable para vuelos de lógica de control enlazados con jMAVSim[cite: 2].
-* **`release/1.16` o superior:** Versión requerida para simulaciones con Gazebo Harmonic (cámaras RGB, sensores de profundidad y LiDAR)[cite: 2].
-
-### 3.3 Construcción y arranque del contenedor
-```bash
-# Permitir que el contenedor acceda al servidor gráfico del sistema anfitrión
-xhost +local:docker
-
-# Construir y levantar el contenedor en segundo plano
-docker compose build
-docker compose up -d
-```
-
-*(En el primer arranque, el contenedor descargará el código fuente de PX4 directamente en el volumen persistente[cite: 2]. El avance puede monitorearse con `docker compose logs -f drone`)[cite: 2].*
+1. **Edición en espacio local:** El código se escribe desde el editor del sistema anfitrión dentro de la carpeta compartida del espacio de trabajo[cite: 2].
+2. **Compilación incremental:** Se compilan exclusivamente los paquetes modificados utilizando cadenas de compilación compartidas y optimizadas mediante caché de objetos (`ccache`)[cite: 2].
+3. **Simulación de lazo cerrado:** Se levantan simultáneamente el gemelo virtual del dron en Gazebo, el estimador de vuelo de PX4 y el puente de comunicación DDS[cite: 2].
+4. **Verificación de interfaces:** Se analiza la consistencia de los mensajes uORB/ROS 2 para confirmar que las transformadas de coordenadas, frecuencias de muestreo y comandos de posición respondan a las tolerancias requeridas antes de desplegar en la aeronave real[cite: 2].
 
 ---
 
-## 4. Flujo de trabajo y atajos de desarrollo
+## 4. Acceso y despliegue para miembros activos
 
-Con el contenedor activo en segundo plano, se recomienda trabajar abriendo terminales independientes para cada proceso[cite: 2]:
+Los archivos de definición técnica (`Dockerfile`, recetas de `docker compose`, scripts de aprovisionamiento y variables de entorno preconfiguradas) se encuentran alojados en el repositorio privado **`Docker_dev_DK`** dentro de la organización de GitHub del equipo[cite: 2]. 
 
-```bash
-# Terminal 1: Simulación de vuelo y física (Gazebo)
-docker compose exec drone px4_gz
-
-# Terminal 2: Agente de comunicación DDS
-docker compose exec drone xrce
-
-# Terminal 3: Compilación y ejecución de nodos de ROS 2
-docker compose exec drone bash
-cd /ros_ws
-cb
-```
-
-### Comandos y alias integrados en el contenedor
-
-| Comando | Acción técnica |
-| :--- | :--- |
-| `cb` | Compila el espacio de trabajo con enlaces simbólicos (`colcon build --symlink-install`)[cite: 2]. |
-| `cbs <paquete>` | Compila únicamente el paquete de ROS 2 seleccionado[cite: 2]. |
-| `cs` | Carga las variables de entorno del espacio de trabajo (`source install/setup.bash`)[cite: 2]. |
-| `xrce` | Inicia el agente de Micro XRCE-DDS por protocolo UDP en el puerto 8888[cite: 2]. |
-| `px4_gz` | Compila (si es necesario) y ejecuta PX4 conectado a Gazebo con el modelo base x500[cite: 2]. |
-| `px4-sim <target>` | Compila y lanza la simulación con modelos específicos (por ejemplo: `px4-sim gz_x500_depth`)[cite: 2]. |
-| `px4-checkout <tag>` | Cambia la rama o etiqueta de PX4, actualiza submódulos y limpia la configuración previa de compilación[cite: 2]. |
-| `px4-sync-assets` | Genera enlaces simbólicos de los modelos de `Dronkab-gz-models` dentro del simulador sin reconstruir la imagen[cite: 2]. |
+Los integrantes activos que requieran desplegar esta herramienta deben solicitar asignación de permisos al líder de área y remitirse a la guía de inicio contenida en el `README.md` interno de dicho repositorio para la configuración inicial de variables locales[cite: 2].
 
 ---
 
-## 5. Aceleración gráfica por hardware con NVIDIA (opcional)
+## 5. Referencias y fuentes de consulta
 
-Por defecto, la simulación opera mediante renderizado por software en el procesador[cite: 2]. Para delegar la carga gráfica a una tarjeta NVIDIA dedicada, instala el paquete de herramientas en el sistema anfitrión[cite: 2]:
+Para profundizar en los principios teóricos y el uso avanzado de las tecnologías que conforman esta plataforma, consulta los siguientes recursos:
 
-```bash
-curl -fsSL [https://nvidia.github.io/libnvidia-container/gpgkey](https://nvidia.github.io/libnvidia-container/gpgkey) | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
-curl -s -L [https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list](https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list) | sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list
-
-sudo apt update
-sudo apt install -y nvidia-container-toolkit
-sudo nvidia-ctk runtime configure --runtime=docker
-sudo systemctl restart docker
-```
-
-Al reiniciar el servicio, `docker-compose.yml` reservará automáticamente los recursos de la tarjeta gráfica al ejecutar `docker compose up -d`[cite: 2].
-
----
-
-## 6. Proyección del ecosistema hacia el futuro
-
-La infraestructura de contenedores de Dronkab continuará creciendo de manera modular:
-
-1. **`Docker-Rasp5`:** Entorno para arquitectura ARM64 enfocado en adquisición directa de hardware (LiDAR por UART, cámaras por interfaz CSI) y enlace con el autopiloto en vuelo real.
-2. **Contenedores de visión e inferencia:** Entornos específicos para aceleración de redes neuronales y visión artificial, manteniendo desacopladas las librerías pesadas de procesamiento visual del contenedor de control básico.
-3. **Contenedor documental (`dronkab-docs`):** Imagen ligera con MkDocs para compilar y validar la documentación sin requerir instalaciones de Python en los equipos de los integrantes.
+* [Manual de simulación SITL en PX4 Autopilot](https://docs.px4.io/main/en/simulation/): Conceptos de simulación de dinámicas de vuelo y lazos de control.
+* [Guía de integración PX4 - ROS 2](https://docs.px4.io/main/en/ros2/user_guide.html): Protocolos uORB, Micro XRCE-DDS y estructura de mensajes.
+* [Documentación de Gazebo Harmonic](https://gazebosim.org/docs/harmonic/): Creación de mundos virtuales, definición de modelos SDF y simulación sensorial.
+* [Documentación oficial de ROS 2 Jazzy](https://docs.ros.org/en/jazzy/): Arquitectura de nodos, gestión de espacios de trabajo y compilación con Colcon.
+* [NVIDIA Container Toolkit Architecture](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html): Principios de exposición de controladores y aceleración de cómputo en contenedores.
