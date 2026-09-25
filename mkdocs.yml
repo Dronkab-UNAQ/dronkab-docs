@@ -61,6 +61,22 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
-# Navegación estructural base
+# Navegación provisional (implementa un menú por carpetas)
 nav:
   - Inicio: index.md
+  
+  - Onboarding:
+      - Bienvenido al equipo: onboarding/primeros_pasos.md
+      - Entorno Docker: onboarding/entorno_docker.md
+      - Flujo Git y Contribución: onboarding/flujo_git.md
+
+  - Hardware:
+      - Ejemplo de documentación: hardware/ejemplo_documento.md
+      - LiDAR:
+          - Proyecto de estadía: hardware/lidar/estadia_lidar.md
+
+  - Algoritmos:
+      - Ejemplo de documentación: algoritmos/ejemplo_documento.md
+
+  - Operaciones:
+      - Checklist pre-vuelo: operaciones/checklist_vuelo.md
