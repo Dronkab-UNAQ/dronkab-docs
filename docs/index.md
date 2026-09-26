@@ -37,7 +37,7 @@ Navega a través de las diferentes secciones del portal según tu área de traba
 
 | Módulo | Enfoque principal | Documentos clave |
 | :--- | :--- | :--- |
-| **Onboarding** | Configuración inicial y primeros pasos para nuevos miembros. | [Primeros Pasos](onboarding/primeros_pasos.md) • [Entorno Docker](onboarding/docker) • [Flujo Git](onboarding/flujo_git.md) |
+| **Onboarding** | Configuración inicial y primeros pasos para nuevos miembros. | [Primeros Pasos](onboarding/primeros_pasos.md) • [Entorno Docker](onboarding/docker/entorno_docker.md) • [Flujo Git](onboarding/flujo_git.md) |
 | **Hardware** | Distribución de potencia, integración electrónica y sensórica. | [Ejemplo](hardware/ejemplo_documento.md) • [Tecnología LiDAR](hardware/lidar/estadia_lidar.md) |
 | **Algoritmos** | Arquitectura en ROS 2, algoritmos de navegación y control PX4. | [Ejemplo](algoritmos/ejemplo_documento.md)|
 | **Operaciones** | Procedimientos de seguridad de campo y listas pre-vuelo. | [Checklist pre-vuelo](operaciones/checklist_vuelo.md) |
@@ -50,5 +50,5 @@ Navega a través de las diferentes secciones del portal según tu área de traba
     Si es tu primera semana en Dronkab, no intentes abarcar toda la documentación de golpe. Tu ruta de inicio recomendada es:
     
     1. Lee la guía de [primeros pasos en Dronkab](onboarding/primeros_pasos.md).
-    2. Levanta tu entorno de desarrollo siguiendo el manual del [Entorno Docker](onboarding/docker).
+    2. Levanta tu entorno de desarrollo siguiendo el manual del [Entorno Docker](onboarding/docker/entorno_docker.md).
     3. Revisa la [guía de flujo Git](onboarding/flujo_git.md) antes de realizar tu primera contribución.
