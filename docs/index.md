@@ -50,5 +50,5 @@ Navega a través de las diferentes secciones del portal según tu área de traba
     Si es tu primera semana en Dronkab, no intentes abarcar toda la documentación de golpe. Tu ruta de inicio recomendada es:
     
     1. Lee la guía de [primeros pasos en Dronkab](onboarding/primeros_pasos.md).
-    2. Levanta tu entorno de desarrollo siguiendo el manual del [Entorno Docker](onboarding/entorno_docker.md).
+    2. Levanta tu entorno de desarrollo siguiendo el manual del [Entorno Docker](onboarding/docker).
     3. Revisa la [guía de flujo Git](onboarding/flujo_git.md) antes de realizar tu primera contribución.
