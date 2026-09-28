@@ -16,14 +16,14 @@ theme:
     # Modo oscuro (predeterminado para entorno de ingenieria)
     - scheme: slate
       primary: orange
-      accent: blue
+      accent: indigo
       toggle:
         icon: material/weather-sunny
         name: Cambiar a modo claro
 
     # Modo claro
     - scheme: default
-      primary: blue
+      primary: indigo
       accent: orange
       toggle:
         icon: material/weather-night
