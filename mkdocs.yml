@@ -1,33 +1,51 @@
 site_name: Dronkab Docs
 site_description: Base de conocimiento técnico y documentación viva de Dronkab.
 site_author: Equipo Dronkab
-site_url: https://dronkab-unaq.github.io/dronkab-docs/ # Ajusta según la organización exacta
+site_url: https://dronkab-unaq.github.io/dronkab-docs/
 
 theme:
   name: material
   language: es
+  
+  # Identidad visual (rutas relativas a la carpeta docs/)
+  logo: assets/img/logo_dronkab.png
+  favicon: assets/img/favicon.ico
+
+  # Paleta de colores con conmutador automatico claro/oscuro
   palette:
-    # Esquema claro (modo día)
-    - scheme: default
-      primary: teal
-      accent: deep orange
-      toggle:
-        icon: material/brightness-7
-        name: Cambiar a modo oscuro
-    # Esquema oscuro (modo noche)
+    # Modo oscuro (predeterminado para entorno de ingenieria)
     - scheme: slate
-      primary: teal
+      primary: deep orange
+      accent: cyan
+      toggle:
+        icon: material/weather-sunny
+        name: Cambiar a modo claro
+
+    # Modo claro
+    - scheme: default
+      primary: blue grey
       accent: deep orange
       toggle:
-        icon: material/brightness-4
-        name: Cambiar a modo claro
+        icon: material/weather-night
+        name: Cambiar a modo oscuro
+
+  # Funcionalidades de navegacion e interaccion visual
   features:
-    - navigation.tabs          # Pestañas superiores por categoría
-    - navigation.sections      # Secciones colapsables en barra lateral
-    - navigation.top           # Botón para volver arriba
-    - search.suggest           # Sugerencias dinámicas en el buscador
-    - search.highlight         # Resaltado de términos de búsqueda
-    - content.code.copy        # Botón para copiar código al portapapeles
+    - navigation.instant        # Carga ultra-rapida tipo SPA (Single Page Application)
+    - navigation.tracking       # Resalta la seccion actual en el menu segun el scroll
+    - navigation.tabs           # Barra superior de pestañas tematicas
+    - navigation.tabs.sticky    # Mantiene visibles las pestañas al desplazarse hacia abajo
+    - navigation.top            # Boton flotante para regresar arriba
+    - navigation.indexes        # Permite hacer clic en la carpeta contenedora
+    - toc.follow                # El menu lateral derecho sigue el scroll del lector
+    - search.suggest            # Sugerencias instantaneas al teclear en el buscador
+    - search.highlight          # Resalta las coincidencias dentro de la pagina
+    - content.code.copy         # Boton de copiar con un clic en cada bloque de codigo
+    - content.action.edit       # Boton para sugerir cambios directos en GitHub
+
+# Enlace de estilos CSS personalizados
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   # Cajas de advertencia y notas (Callouts / Admonitions)
