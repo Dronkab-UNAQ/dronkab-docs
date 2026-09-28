@@ -15,16 +15,16 @@ theme:
   palette:
     # Modo oscuro (predeterminado para entorno de ingenieria)
     - scheme: slate
-      primary: deep orange
-      accent: cyan
+      primary: orange
+      accent: blue
       toggle:
         icon: material/weather-sunny
         name: Cambiar a modo claro
 
     # Modo claro
     - scheme: default
-      primary: blue grey
-      accent: deep orange
+      primary: blue
+      accent: orange
       toggle:
         icon: material/weather-night
         name: Cambiar a modo oscuro
